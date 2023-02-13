@@ -10,14 +10,12 @@ import (
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	pluginapi "k8s.io/kubernetes/pkg/kubelet/apis/deviceplugin/v1beta1"
+	pluginapi "k8s.io/kubelet/pkg/apis/deviceplugin/v1beta1"
 )
 
 const (
-	resourceName           = "github.com/fuse"
-	serverSock             = pluginapi.DevicePluginPath + "fuse.sock"
-	envDisableHealthChecks = "DP_DISABLE_HEALTHCHECKS"
-	allHealthChecks        = "xids"
+	resourceName = "github.com/fuse"
+	serverSock   = pluginapi.DevicePluginPath + "fuse.sock"
 )
 
 // FuseDevicePlugin implements the Kubernetes device plugin API
@@ -29,6 +27,11 @@ type FuseDevicePlugin struct {
 	health chan *pluginapi.Device
 
 	server *grpc.Server
+}
+
+func (m *FuseDevicePlugin) GetPreferredAllocation(_ context.Context, _ *pluginapi.PreferredAllocationRequest) (*pluginapi.PreferredAllocationResponse, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func NewFuseDevicePlugin(number int) *FuseDevicePlugin {
@@ -130,7 +133,7 @@ func (m *FuseDevicePlugin) Register(kubeletEndpoint, resourceName string) error 
 }
 
 // ListAndWatch lists devices and update that list according to the health status
-func (m *FuseDevicePlugin) ListAndWatch(e *pluginapi.Empty, s pluginapi.DevicePlugin_ListAndWatchServer) error {
+func (m *FuseDevicePlugin) ListAndWatch(_ *pluginapi.Empty, s pluginapi.DevicePlugin_ListAndWatchServer) error {
 	s.Send(&pluginapi.ListAndWatchResponse{Devices: m.devs})
 
 	for {
@@ -149,7 +152,7 @@ func (m *FuseDevicePlugin) ListAndWatch(e *pluginapi.Empty, s pluginapi.DevicePl
 // }
 
 // Allocate which return list of devices.
-func (m *FuseDevicePlugin) Allocate(ctx context.Context, reqs *pluginapi.AllocateRequest) (*pluginapi.AllocateResponse, error) {
+func (m *FuseDevicePlugin) Allocate(_ context.Context, reqs *pluginapi.AllocateRequest) (*pluginapi.AllocateResponse, error) {
 	devs := m.devs
 	var responses pluginapi.AllocateResponse
 

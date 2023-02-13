@@ -1,14 +1,21 @@
-module fuse-device-plugin
+module github.com/GDATASoftwareAG/fuse-device-plugin
 
-go 1.12
+go 1.19
 
 require (
 	github.com/fsnotify/fsnotify v1.5.1
+	golang.org/x/net v0.5.0
+	google.golang.org/grpc v1.53.0
+	k8s.io/kubelet v0.25.1
+)
+
+replace k8s.io/kubelet => k8s.io/kubelet v0.25.1
+
+require (
 	github.com/gogo/protobuf v1.3.2 // indirect
-	golang.org/x/net v0.0.0-20211005001312-d4b1ae081e3b
-	golang.org/x/sys v0.0.0-20211004093028-2c5d950f24ef // indirect
-	golang.org/x/text v0.3.7 // indirect
-	google.golang.org/genproto v0.0.0-20211005153810-c76a74d43a8e // indirect
-	google.golang.org/grpc v1.41.0
-	k8s.io/kubernetes v1.14.6
+	github.com/golang/protobuf v1.5.2 // indirect
+	golang.org/x/sys v0.4.0 // indirect
+	golang.org/x/text v0.6.0 // indirect
+	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
+	google.golang.org/protobuf v1.28.1 // indirect
 )
