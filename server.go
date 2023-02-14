@@ -8,13 +8,15 @@ import (
 	"path"
 	"time"
 
+	"google.golang.org/grpc/credentials/insecure"
+
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	pluginapi "k8s.io/kubelet/pkg/apis/deviceplugin/v1beta1"
 )
 
 const (
-	resourceName = "github.com/fuse"
+	resourceName = "github.com/gdatasoftwareag/fuse-device-plugin"
 	serverSock   = pluginapi.DevicePluginPath + "fuse.sock"
 )
 
@@ -54,12 +56,10 @@ func (m *FuseDevicePlugin) PreStartContainer(context.Context, *pluginapi.PreStar
 
 // dial establishes the gRPC communication with the registered device plugin.
 func dial(unixSocketPath string, timeout time.Duration) (*grpc.ClientConn, error) {
-	c, err := grpc.Dial(unixSocketPath, grpc.WithInsecure(), grpc.WithBlock(),
-		grpc.WithTimeout(timeout),
-		grpc.WithDialer(func(addr string, timeout time.Duration) (net.Conn, error) {
-			return net.DialTimeout("unix", addr, timeout)
-		}),
-	)
+	ctx, _ := context.WithTimeout(context.Background(), timeout)
+	c, err := grpc.DialContext(ctx, unixSocketPath,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock())
 
 	if err != nil {
 		return nil, err
@@ -134,7 +134,9 @@ func (m *FuseDevicePlugin) Register(kubeletEndpoint, resourceName string) error 
 
 // ListAndWatch lists devices and update that list according to the health status
 func (m *FuseDevicePlugin) ListAndWatch(_ *pluginapi.Empty, s pluginapi.DevicePlugin_ListAndWatchServer) error {
-	s.Send(&pluginapi.ListAndWatchResponse{Devices: m.devs})
+	if err := s.Send(&pluginapi.ListAndWatchResponse{Devices: m.devs}); err != nil {
+		return err
+	}
 
 	for {
 		select {
@@ -142,14 +144,12 @@ func (m *FuseDevicePlugin) ListAndWatch(_ *pluginapi.Empty, s pluginapi.DevicePl
 			return nil
 		case d := <-m.health:
 			d.Health = pluginapi.Unhealthy
-			s.Send(&pluginapi.ListAndWatchResponse{Devices: m.devs})
+			if err := s.Send(&pluginapi.ListAndWatchResponse{Devices: m.devs}); err != nil {
+				return err
+			}
 		}
 	}
 }
-
-// func (m *FuseDevicePlugin) unhealthy(dev *pluginapi.Device) {
-// 	m.health <- dev
-// }
 
 // Allocate which return list of devices.
 func (m *FuseDevicePlugin) Allocate(_ context.Context, reqs *pluginapi.AllocateRequest) (*pluginapi.AllocateResponse, error) {
