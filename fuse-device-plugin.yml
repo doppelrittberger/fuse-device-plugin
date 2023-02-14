@@ -12,7 +12,6 @@ spec:
       labels:
         name: fuse-device-plugin
     spec:
-      hostNetwork: true
       containers:
         - image: soolaugust/fuse-device-plugin:v1.0
           name: fuse-device-plugin-ctr
