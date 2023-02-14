@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	resourceName = "github.com/gdatasoftwareag/fuse-device-plugin"
+	resourceName = "github.com/fuse"
 	serverSock   = pluginapi.DevicePluginPath + "fuse.sock"
 )
 
@@ -32,8 +32,7 @@ type FuseDevicePlugin struct {
 }
 
 func (m *FuseDevicePlugin) GetPreferredAllocation(_ context.Context, _ *pluginapi.PreferredAllocationRequest) (*pluginapi.PreferredAllocationResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, nil
 }
 
 func NewFuseDevicePlugin(number int) *FuseDevicePlugin {
@@ -59,7 +58,13 @@ func dial(unixSocketPath string, timeout time.Duration) (*grpc.ClientConn, error
 	ctx, _ := context.WithTimeout(context.Background(), timeout)
 	c, err := grpc.DialContext(ctx, unixSocketPath,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock())
+		grpc.WithBlock(),
+		grpc.WithContextDialer(func(ctx context.Context, addr string) (net.Conn, error) {
+			if deadline, ok := ctx.Deadline(); ok {
+				return net.DialTimeout("unix", addr, time.Until(deadline))
+			}
+			return net.Dial("unix", addr)
+		}))
 
 	if err != nil {
 		return nil, err
