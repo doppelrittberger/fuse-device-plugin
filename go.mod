@@ -1,4 +1,4 @@
-module github.com/GDATASoftwareAG/fuse-device-plugin
+module github.com/doppelrittberger/fuse-device-plugin
 
 go 1.19
 

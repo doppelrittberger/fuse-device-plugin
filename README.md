@@ -1,5 +1,3 @@
-English | [中文](README_CN.md)
-
 # fuse device plugin for Kubernetes
 
 This repository contains implementation of
@@ -42,9 +40,5 @@ spec:
   - ...
     resources:
       limits:
-        github.com/gdatasoftwareag/fuse-device-plugin: 1
+        github.com/fuse: 1
 ```
-
-# Thanks
-
-![Goland](https://blog.jetbrains.com/wp-content/uploads/2019/01/goland_icon.svg)
