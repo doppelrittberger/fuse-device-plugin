@@ -5,10 +5,15 @@ metadata:
 spec:
   containers:
     - name: no-priv
-      image: quay.io/podman/stable
-      args:
-        - sleep
-        - "1000000"
+      image: doppelrittberger/podman-maven:latest
+      imagePullPolicy: Always
       resources:
         limits:
           github.com/fuse: 1
+      volumeMounts:
+        - mountPath: /dev/net/tun
+          name: tun
+  volumes:
+    - name: tun
+      hostPath:
+        path: /dev/net/tun
