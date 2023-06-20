@@ -14,7 +14,7 @@ on:
     types: [published]
   schedule:
     # run daily 0:00
-    - cron: '0 0 * * *
+    - cron: '0 0 * * *'
 
 jobs:
   push_to_registry:
