@@ -12,6 +12,9 @@ name: Publish Docker image
 on:
   release:
     types: [published]
+  schedule:
+    # run daily 0:00
+    - cron: '0 0 * * *
 
 jobs:
   push_to_registry:
